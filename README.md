@@ -44,7 +44,26 @@ This project is an API documentation portal for the Escritório de Dados. It pro
 
 ## Deployment
 
-1. Build the project as described above.
+### GitHub Pages
+
+This project is set up to automatically deploy to GitHub Pages using GitHub Actions. Every push to the `main` branch will trigger a new build and deployment.
+
+To set up GitHub Pages deployment:
+
+1. Go to your GitHub repository settings.
+2. Navigate to the "Pages" section.
+3. Under "Source", select "GitHub Actions" as the deployment source.
+
+The site will be available at `https://your-username.github.io/apis-portal/`
+
+### Manual Deployment
+
+If you prefer to deploy manually or to a different platform:
+
+1. Build the project:
+   ```
+   npm run build
+   ```
 2. Deploy the contents of the `dist` directory to your web server or hosting platform of choice.
 
 For example, if you're using Netlify or Vercel, you can connect your repository and set the build command to `npm run build` and the publish directory to `dist`.
