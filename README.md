@@ -72,18 +72,17 @@ For example, if you're using Netlify or Vercel, you can connect your repository 
 
 To add a new API to the portal:
 
-1. Open the `public/apis.yaml` file.
-2. Add a new entry under the `apis` key with the following format:
+1. Open the `src/apis.tsx` file.
+2. Add a new entry to the `apis` array with the following format:
 
-   ```yaml
-   - name: Your New API Name
-     url: https://your-new-api.com/openapi.json
+   ```typescript
+   { name: "Your New API Name", url: "https://your-new-api.com/openapi.json" }
    ```
 
-3. Save the `apis.yaml` file.
-4. Restart the development server or rebuild the project for production.
+3. Save the `apis.tsx` file.
+4. The new API will automatically appear in the header of the application, allowing users to view its documentation.
 
-The new API will automatically appear in the header of the application, allowing users to view its documentation.
+No restart or rebuild is necessary as the changes will be reflected immediately due to React's hot module replacement.
 
 ## Configuration
 
