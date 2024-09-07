@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { BrowserRouter as Router } from 'react-router-dom'
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import OpenAPIViewer from './components/OpenAPIViewer'
+import FloatingSearch from './components/FloatingSearch'
 import { apis } from './apis'
 
 interface Endpoint {
@@ -17,6 +17,27 @@ function App() {
   const [searchTerm, setSearchTerm] = useState('')
   const [endpoints, setEndpoints] = useState<Endpoint[]>([])
   const [filteredEndpoints, setFilteredEndpoints] = useState<Endpoint[]>([])
+  const [selectedEndpoint, setSelectedEndpoint] = useState<string | null>(null)
+  const openAPIViewerRef = useRef<any>(null)
+  const searchInputRef = useRef<HTMLInputElement>(null)
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
+        event.preventDefault()
+        setIsSearchOpen(true)
+      } else if (event.key === 'Escape') {
+        setIsSearchOpen(false)
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [])
 
   useEffect(() => {
     const fetchAllSpecs = async () => {
@@ -55,6 +76,24 @@ function App() {
     setFilteredEndpoints(filtered);
   }, [searchTerm, endpoints]);
 
+  const handleEndpointClick = (endpoint: Endpoint) => {
+    const api = apis.find(api => api.name === endpoint.apiName);
+    if (api) {
+      setSelectedAPI(api.url);
+      const cleanPath = endpoint.path.replace(/\/$/, '');
+      setSelectedEndpoint(`${endpoint.method.toUpperCase()} ${cleanPath}`);
+      setSearchTerm('');
+      setIsSearchOpen(false);
+      console.log("Selected endpoint:", `${endpoint.method.toUpperCase()} ${cleanPath}`);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedEndpoint && openAPIViewerRef.current) {
+      openAPIViewerRef.current.scrollToOperation(selectedEndpoint);
+    }
+  }, [selectedEndpoint]);
+
   const renderHomePage = () => (
     <div className="container mx-auto p-8">
       <h1 className="text-4xl font-bold mb-6">Welcome to the API Explorer</h1>
@@ -89,6 +128,7 @@ function App() {
                 onClick={() => {
                   setSelectedAPI(null)
                   setSearchTerm('')
+                  setSelectedEndpoint(null)
                 }}
               >
                 APIs Escritório de Dados
@@ -101,6 +141,7 @@ function App() {
                     onClick={() => {
                       setSelectedAPI(api.url)
                       setSearchTerm('')
+                      setSelectedEndpoint(null)
                     }}
                   >
                     {api.name}
@@ -108,14 +149,13 @@ function App() {
                 ))}
               </nav>
             </div>
-            <div className="w-full sm:w-auto mt-4 sm:mt-0">
-              <Input
-                type="text"
-                placeholder="Search endpoints..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+            <div className="w-full sm:w-auto mt-4 sm:mt-0 relative">
+              <Button
+                onClick={() => setIsSearchOpen(true)}
                 className="w-full sm:w-64"
-              />
+              >
+                Search endpoints... (⌘K)
+              </Button>
             </div>
           </div>
         </header>
@@ -123,7 +163,11 @@ function App() {
           {searchTerm ? (
             <div className="p-4 space-y-2">
               {filteredEndpoints.map((endpoint, index) => (
-                <div key={index} className="p-2 border rounded">
+                <div 
+                  key={index} 
+                  className="p-2 border rounded cursor-pointer hover:bg-gray-100"
+                  onClick={() => handleEndpointClick(endpoint)}
+                >
                   <div className="font-bold">{endpoint.apiName}</div>
                   <div>
                     <span className="font-mono bg-gray-200 px-1 rounded">{endpoint.method}</span> {endpoint.path}
@@ -133,11 +177,23 @@ function App() {
               ))}
             </div>
           ) : selectedAPI ? (
-            <OpenAPIViewer specUrl={selectedAPI} />
+            <OpenAPIViewer 
+              specUrl={selectedAPI} 
+              ref={openAPIViewerRef}
+              selectedEndpoint={selectedEndpoint}
+            />
           ) : (
             renderHomePage()
           )}
         </main>
+        <FloatingSearch
+          isOpen={isSearchOpen}
+          onClose={() => setIsSearchOpen(false)}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          filteredEndpoints={filteredEndpoints}
+          onEndpointClick={handleEndpointClick}
+        />
       </div>
     </Router>
   )
