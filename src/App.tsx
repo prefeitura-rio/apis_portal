@@ -55,13 +55,44 @@ function App() {
     setFilteredEndpoints(filtered);
   }, [searchTerm, endpoints]);
 
+  const renderHomePage = () => (
+    <div className="container mx-auto p-8">
+      <h1 className="text-4xl font-bold mb-6">Welcome to the API Explorer</h1>
+      <p className="text-xl mb-8">
+        Explore and interact with various APIs provided by the Escritório de Dados. 
+        Use the search bar above to find specific endpoints across all APIs.
+      </p>
+
+      <h2 className="text-2xl font-semibold mb-4">Available APIs</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {apis.map((api) => (
+          <div key={api.url} className="border rounded-lg p-4 shadow-sm">
+            <h3 className="text-xl font-semibold mb-2">{api.name}</h3>
+            <p className="mb-4">{api.description}</p>
+            <Button onClick={() => setSelectedAPI(api.url)}>
+              View Documentation
+            </Button>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+
   return (
     <Router>
       <div className="min-h-screen bg-background flex flex-col w-screen">
         <header className="bg-background shadow-sm">
           <div className="container mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between">
             <div className="flex items-center space-x-4 mb-4 sm:mb-0">
-              <h1 className="text-2xl font-bold text-primary">APIs Escritório de Dados</h1>
+              <h1 
+                className="text-2xl font-bold text-primary cursor-pointer hover:underline"
+                onClick={() => {
+                  setSelectedAPI(null)
+                  setSearchTerm('')
+                }}
+              >
+                APIs Escritório de Dados
+              </h1>
               <nav className="flex flex-wrap gap-2">
                 {apis.map((api) => (
                   <Button
@@ -77,7 +108,7 @@ function App() {
                 ))}
               </nav>
             </div>
-            <div className="w-full sm:w-auto">
+            <div className="w-full sm:w-auto mt-4 sm:mt-0">
               <Input
                 type="text"
                 placeholder="Search endpoints..."
@@ -104,10 +135,7 @@ function App() {
           ) : selectedAPI ? (
             <OpenAPIViewer specUrl={selectedAPI} />
           ) : (
-            <div className="container mx-auto p-4 text-center">
-              <h2 className="text-2xl font-semibold mb-4">Welcome to API Explorer</h2>
-              <p>Select an API from the header to view its documentation or use the search to find specific endpoints.</p>
-            </div>
+            renderHomePage()
           )}
         </main>
       </div>
