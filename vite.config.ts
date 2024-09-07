@@ -11,4 +11,5 @@ export default defineConfig({
   },
   base: '/apis-portal/', // Add this line
   publicDir: 'public',
+
 })
